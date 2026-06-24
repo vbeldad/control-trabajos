@@ -3,199 +3,243 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Control de Trabajos</title>
+<meta name="theme-color" content="#0f172a">
+<title>Reformas E.A. · Control de Trabajos</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Work+Sans:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
 
   :root{
-    --ink:#1a1410;
-    --paper:#f4ede2;
-    --card:#fffaf2;
-    --rust:#b5532a;
-    --rust-dark:#8f3d1c;
-    --olive:#5c6b3a;
-    --gold:#c79a3e;
-    --line:#d8c9b2;
-    --shadow:rgba(60,40,20,.18);
+    --bg:#0f172a;
+    --surface:#ffffff;
+    --surface-2:#f8fafc;
+    --ink:#0f172a;
+    --muted:#64748b;
+    --line:#e2e8f0;
+    --brand:#f97316;
+    --brand-dark:#ea580c;
+    --accent:#0ea5e9;
+    --green:#10b981;
+    --green-soft:#d1fae5;
+    --amber:#f59e0b;
+    --amber-soft:#fef3c7;
+    --shadow:0 10px 30px -12px rgba(15,23,42,.25);
+    --shadow-sm:0 2px 8px rgba(15,23,42,.08);
   }
   *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family:'Work Sans',sans-serif;
-    background:
-      radial-gradient(circle at 15% 10%, rgba(197,154,62,.12), transparent 40%),
-      radial-gradient(circle at 85% 90%, rgba(92,107,58,.1), transparent 45%),
-      var(--paper);
-    color:var(--ink);
-    min-height:100vh;
-    padding:32px 16px 80px;
-  }
-  .wrap{max-width:980px;margin:0 auto}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--surface-2);color:var(--ink);min-height:100vh}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 16px 80px}
 
-  header.top{text-align:center;margin-bottom:30px;position:relative}
-  header.top h1{
-    font-family:'Fraunces',serif;font-weight:900;
-    font-size:clamp(2.2rem,6vw,3.6rem);line-height:.95;
-    color:var(--rust-dark);letter-spacing:-1px;
+  .hero{
+    background:linear-gradient(135deg,#0f172a 0%,#1e293b 55%,#283549 100%);
+    color:#fff;border-radius:0 0 28px 28px;padding:30px 28px 36px;margin-bottom:30px;
+    position:relative;overflow:hidden;box-shadow:var(--shadow);
   }
-  header.top p{margin-top:8px;font-size:.95rem;color:var(--olive);
-    letter-spacing:.5px;text-transform:uppercase;font-weight:600}
-  .rule{height:3px;width:90px;margin:14px auto 0;
-    background:linear-gradient(90deg,var(--gold),var(--rust));border-radius:2px}
+  .hero::after{content:"";position:absolute;right:-60px;top:-60px;width:260px;height:260px;
+    background:radial-gradient(circle,rgba(249,115,22,.25),transparent 70%)}
+  .hero-inner{max-width:1000px;margin:0 auto;display:flex;align-items:center;
+    justify-content:space-between;gap:24px;flex-wrap:wrap;position:relative;z-index:1}
+  .brand{display:flex;align-items:center;gap:18px}
+  .seal{width:78px;height:78px;flex-shrink:0}
+  .brand h1{font-family:'Sora',sans-serif;font-weight:800;font-size:1.85rem;line-height:1;letter-spacing:-.5px}
+  .brand h1 b{color:var(--brand);font-weight:800}
+  .brand p{color:#94a3b8;font-size:.88rem;margin-top:6px;font-weight:500}
+  .hero-illu{width:190px;max-width:40vw;flex-shrink:0}
 
-  .card{
-    background:var(--card);border:1px solid var(--line);border-radius:16px;
-    padding:24px;margin-bottom:26px;box-shadow:0 6px 24px var(--shadow);
-  }
-  .card h2{
-    font-family:'Fraunces',serif;font-size:1.4rem;color:var(--rust);
-    margin-bottom:18px;display:flex;align-items:center;gap:10px;
-  }
-  .card h2 .num{background:var(--rust);color:#fff;width:30px;height:30px;border-radius:50%;
-    display:grid;place-items:center;font-size:.95rem;font-weight:600}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:20px;
+    padding:26px;margin-bottom:22px;box-shadow:var(--shadow-sm)}
+  .card h2{font-family:'Sora',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:20px;
+    display:flex;align-items:center;gap:12px;color:var(--ink)}
+  .card h2 .ic{width:38px;height:38px;border-radius:11px;background:var(--brand);
+    display:grid;place-items:center;flex-shrink:0}
+  .card h2 .ic svg{width:20px;height:20px;stroke:#fff}
 
-  label{display:block;font-size:.78rem;font-weight:600;text-transform:uppercase;
-    letter-spacing:.5px;color:var(--olive);margin-bottom:6px}
-  input,select{
-    width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;
-    background:#fff;font-family:inherit;font-size:1rem;color:var(--ink);
-  }
-  input:focus,select:focus{outline:none;border-color:var(--rust);box-shadow:0 0 0 3px rgba(181,83,42,.15)}
+  label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:7px}
+  input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:11px;
+    background:var(--surface-2);font-family:inherit;font-size:1rem;color:var(--ink);
+    transition:border-color .15s,box-shadow .15s,background .15s}
+  input:focus{outline:none;border-color:var(--brand);background:#fff;box-shadow:0 0 0 4px rgba(249,115,22,.12)}
 
-  .grid{display:grid;gap:14px}
+  .grid{display:grid;gap:16px}
   .g2{grid-template-columns:1fr 1fr}
   .g3{grid-template-columns:1fr 1fr 1fr}
-  .gcat{grid-template-columns:2fr 1fr 1fr}
-  @media(max-width:620px){.g2,.g3,.gcat{grid-template-columns:1fr}}
+  @media(max-width:640px){.g2,.g3{grid-template-columns:1fr}}
 
-  button{font-family:inherit;font-weight:600;cursor:pointer;border:none;border-radius:9px;
-    padding:11px 20px;font-size:.95rem;transition:transform .12s,filter .12s}
+  button{font-family:inherit;font-weight:600;cursor:pointer;border:none;border-radius:11px;
+    padding:12px 22px;font-size:.95rem;transition:transform .12s,filter .12s;
+    display:inline-flex;align-items:center;gap:8px}
   button:active{transform:translateY(1px)}
-  .btn-add{background:var(--olive);color:#fff}
-  .btn-add:hover{filter:brightness(1.08)}
-  .btn-rust{background:var(--rust);color:#fff}
-  .btn-rust:hover{filter:brightness(1.08)}
-  .btn-ghost{background:transparent;color:var(--rust);border:1px solid var(--rust)}
-  .btn-ghost:hover{background:var(--rust);color:#fff}
-  .btn-x{background:transparent;color:var(--rust-dark);padding:4px 8px;font-size:1.1rem;line-height:1}
+  .btn-add{background:var(--accent);color:#fff;box-shadow:0 4px 12px -4px rgba(14,165,233,.5)}
+  .btn-add:hover{filter:brightness(1.06)}
+  .btn-brand{background:var(--brand);color:#fff;box-shadow:0 4px 12px -4px rgba(249,115,22,.55)}
+  .btn-brand:hover{filter:brightness(1.06)}
+  .btn-ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--brand);color:var(--brand)}
+  .btn-x{background:transparent;color:#cbd5e1;padding:4px 8px;font-size:1.1rem;line-height:1}
+  .btn-x:hover{color:#ef4444}
 
-  table{width:100%;border-collapse:collapse;margin-top:14px}
-  th{font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--olive);
-    text-align:left;padding:8px 10px;border-bottom:2px solid var(--line)}
-  td{padding:9px 10px;border-bottom:1px solid var(--line);font-size:.92rem}
+  table{width:100%;border-collapse:collapse;margin-top:16px}
+  th{font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);
+    text-align:left;padding:10px 12px;border-bottom:2px solid var(--line);font-weight:600}
+  td{padding:11px 12px;border-bottom:1px solid var(--line);font-size:.93rem}
   td.num,th.num{text-align:right}
   tr:last-child td{border-bottom:none}
-  .empty{text-align:center;color:#a89878;font-style:italic;padding:18px}
+  tbody tr{transition:background .12s}
+  tbody tr:hover{background:var(--surface-2)}
+  .empty{text-align:center;color:#94a3b8;font-style:italic;padding:22px}
 
-  .totals{margin-top:22px;background:linear-gradient(135deg,#fff8ec,#f6ecd8);
-    border:1px solid var(--gold);border-radius:14px;padding:20px 24px}
-  .totline{display:flex;justify-content:space-between;padding:7px 0;font-size:1rem}
-  .totline.grand{border-top:2px dashed var(--gold);margin-top:8px;padding-top:14px;
-    font-family:'Fraunces',serif;font-size:1.7rem;font-weight:900;color:var(--rust-dark)}
+  .totals{margin-top:24px;background:linear-gradient(135deg,#fff7ed,#ffedd5);
+    border:1.5px solid #fed7aa;border-radius:16px;padding:22px 26px}
+  .totline{display:flex;justify-content:space-between;padding:8px 0;font-size:1rem;color:#7c2d12}
   .totline span:last-child{font-variant-numeric:tabular-nums;font-weight:600}
+  .totline.grand{border-top:2px dashed #fdba74;margin-top:10px;padding-top:16px;
+    font-family:'Sora',sans-serif;font-size:1.8rem;font-weight:800;color:var(--brand-dark)}
 
-  .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px;justify-content:center}
-  .mini{font-size:.8rem;color:#988;margin-top:6px}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px;justify-content:center}
+  .mini{font-size:.82rem;color:#94a3b8;margin-top:10px}
 
-  .joblist{list-style:none}
-  .jobitem{
-    display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);
-    border-radius:12px;margin-bottom:10px;background:#fff;transition:box-shadow .15s,transform .12s;
-  }
-  .jobitem:hover{box-shadow:0 4px 14px var(--shadow);transform:translateY(-1px)}
+  .joblist{list-style:none;display:grid;gap:12px}
+  .jobitem{display:flex;align-items:center;gap:16px;padding:16px 18px;border:1.5px solid var(--line);
+    border-radius:16px;background:#fff;transition:box-shadow .18s,transform .12s,border-color .15s}
+  .jobitem:hover{box-shadow:var(--shadow);transform:translateY(-2px);border-color:#fed7aa}
+  .jobitem .avatar{width:46px;height:46px;border-radius:12px;flex-shrink:0;
+    background:linear-gradient(135deg,#f97316,#fb923c);display:grid;place-items:center}
+  .jobitem .avatar svg{width:24px;height:24px;stroke:#fff}
   .jobitem .info{flex:1;min-width:0;cursor:pointer}
-  .jobitem .info strong{display:block;font-size:1.05rem;color:var(--ink);
+  .jobitem .info strong{display:block;font-size:1.05rem;font-weight:600;color:var(--ink);
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .jobitem .info small{color:#988;font-size:.82rem}
-  .jobitem .money{font-family:'Fraunces',serif;font-weight:700;color:var(--rust-dark);
-    font-size:1.15rem;white-space:nowrap;text-align:right}
-  .jobitem .money small{display:block;font-family:'Work Sans',sans-serif;font-weight:500;
-    font-size:.7rem;color:#988}
-  .badge{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;
-    padding:3px 9px;border-radius:20px;white-space:nowrap}
-  .badge.abierto{background:#e8efd9;color:var(--olive)}
-  .badge.cerrado{background:#f2ddd2;color:var(--rust-dark)}
-  .jobitem .del{background:transparent;color:var(--rust-dark);font-size:1.2rem;padding:4px 8px}
+  .jobitem .info small{color:var(--muted);font-size:.83rem}
+  .jobitem .money{font-family:'Sora',sans-serif;font-weight:700;color:var(--brand-dark);
+    font-size:1.15rem;white-space:nowrap}
+  .badge{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;
+    padding:5px 11px;border-radius:30px;white-space:nowrap}
+  .badge.abierto{background:var(--amber-soft);color:#b45309}
+  .badge.cerrado{background:var(--green-soft);color:#047857}
+  .jobitem .del{background:transparent;color:#cbd5e1;font-size:1.15rem;padding:6px 8px}
+  .jobitem .del:hover{color:#ef4444}
 
-  .topbar{display:flex;justify-content:space-between;align-items:center;
-    flex-wrap:wrap;gap:12px;margin-bottom:18px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:20px}
+  .topbar h2{margin:0}
   .hidden{display:none}
   .estado-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 
-  .selecto{background:#fbf6ec;border:1px dashed var(--gold);border-radius:12px;
-    padding:14px 16px;margin-bottom:16px}
-  .selecto label{color:var(--rust-dark)}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+  @media(max-width:640px){.stats{grid-template-columns:1fr}}
+  .stat{background:#fff;border:1.5px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+  .stat .k{font-size:.74rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600}
+  .stat .v{font-family:'Sora',sans-serif;font-size:1.6rem;font-weight:800;margin-top:6px}
+  .stat.t1 .v{color:var(--brand)}
+  .stat.t2 .v{color:var(--amber)}
+  .stat.t3 .v{color:var(--green)}
 
-  .histctrl{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
-  .histctrl .mesbox{flex:1;min-width:150px}
+  .backup-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    background:#fff;border:1.5px solid var(--line);border-radius:16px;
+    padding:14px 18px;margin-bottom:22px;box-shadow:var(--shadow-sm)}
+  .backup-bar .bb-txt{flex:1;min-width:180px}
+  .backup-bar .bb-txt strong{display:block;font-size:.95rem;color:var(--ink);font-weight:600}
+  .backup-bar .bb-txt small{color:var(--muted);font-size:.8rem}
+  .btn-soft{background:var(--surface-2);color:var(--ink);border:1.5px solid var(--line)}
+  .btn-soft:hover{border-color:var(--brand);color:var(--brand)}
+  .aviso{display:none;align-items:center;gap:12px;flex-wrap:wrap;
+    background:var(--amber-soft);border:1.5px solid #fcd34d;border-radius:16px;
+    padding:14px 18px;margin-bottom:22px;color:#92400e}
+  .aviso.show{display:flex}
+  .aviso .av-txt{flex:1;min-width:180px;font-size:.9rem;font-weight:500}
+  .aviso button{padding:9px 16px;font-size:.85rem}
+  .btn-amber{background:var(--amber);color:#fff}
+  .btn-amber:hover{filter:brightness(1.05)}
 </style>
 </head>
 <body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="brand">
+      <!-- LOGO SELLO R·E·A -->
+      <svg class="seal" viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="49" fill="#0b1220"/>
+        <circle cx="50" cy="50" r="41" fill="none" stroke="#f97316" stroke-width="2.5"/>
+        <text x="50" y="59" text-anchor="middle" font-family="Sora, Arial, sans-serif" font-weight="800" font-size="27" fill="#ffffff" letter-spacing="1.5">R<tspan fill="#f97316">·</tspan>E<tspan fill="#f97316">·</tspan>A</text>
+        <text x="50" y="77" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-weight="600" font-size="6.5" fill="#94a3b8" letter-spacing="2.5">REFORMAS</text>
+      </svg>
+      <div>
+        <h1>Reformas <b>E.A.</b></h1>
+        <p>Control de horas, materiales y presupuestos</p>
+      </div>
+    </div>
+    <svg class="hero-illu" viewBox="0 0 240 170" fill="none">
+      <rect x="0" y="148" width="240" height="6" rx="3" fill="#334155"/>
+      <path d="M40 80L96 40l56 40" stroke="#475569" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="50" y="78" width="92" height="70" rx="4" fill="#1e293b" stroke="#475569" stroke-width="4"/>
+      <rect x="66" y="98" width="26" height="26" rx="3" fill="#0ea5e9" opacity=".85"/>
+      <rect x="104" y="98" width="24" height="50" rx="3" fill="#334155"/>
+      <path d="M150 60v88M210 60v88M150 90h60M150 120h60" stroke="#f97316" stroke-width="4" stroke-linecap="round"/>
+      <rect x="146" y="86" width="68" height="7" rx="3" fill="#fb923c"/>
+      <rect x="146" y="116" width="68" height="7" rx="3" fill="#fb923c"/>
+      <path d="M186 60V20h-8M186 24h44M214 24v10" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M22 138a16 16 0 0 1 32 0" fill="#f97316"/>
+      <rect x="16" y="136" width="44" height="7" rx="3.5" fill="#ea580c"/>
+    </svg>
+  </div>
+</div>
+
 <div class="wrap">
 
-  <header class="top">
-    <h1>Control de Trabajos</h1>
-    <p>Horas · Materiales · Presupuesto</p>
-    <div class="rule"></div>
-  </header>
-
-  <!-- ============ VISTA LISTA ============ -->
   <div id="vistaLista">
+
+    <div class="aviso" id="avisoBackup">
+      <div class="av-txt">⚠️ Hace tiempo que no guardas una copia de seguridad. Te recomiendo descargarla para no perder tus trabajos.</div>
+      <button class="btn-amber" onclick="guardarCopia()">Guardar copia ahora</button>
+      <button class="btn-soft" onclick="posponerAviso()">Más tarde</button>
+    </div>
+
+    <div class="backup-bar">
+      <div class="bb-txt">
+        <strong>Copia de seguridad</strong>
+        <small id="bb-info">Descarga un archivo con todos tus trabajos para no perderlos.</small>
+      </div>
+      <button class="btn-soft" onclick="guardarCopia()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Guardar copia
+      </button>
+      <button class="btn-soft" onclick="document.getElementById('inputCopia').click()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21V9M7 14l5-5 5 5M5 3h14" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Cargar copia
+      </button>
+      <input type="file" id="inputCopia" accept=".json,application/json" style="display:none" onchange="cargarCopia(event)">
+    </div>
+
+    <div class="stats">
+      <div class="stat t1"><div class="k">Trabajos totales</div><div class="v" id="st_total">0</div></div>
+      <div class="stat t2"><div class="k">Abiertos · pendiente</div><div class="v" id="st_abierto">0,00 €</div></div>
+      <div class="stat t3"><div class="k">Cerrados · cobrado</div><div class="v" id="st_cerrado">0,00 €</div></div>
+    </div>
+
     <section class="card">
       <div class="topbar">
-        <h2 style="margin:0"><span class="num">≡</span> Trabajos activos</h2>
-        <button class="btn-rust" onclick="nuevoTrabajo()">+ Nuevo trabajo</button>
+        <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" stroke-linecap="round"/></svg></span>Mis trabajos</h2>
+        <button class="btn-brand" onclick="nuevoTrabajo()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>
+          Nuevo trabajo
+        </button>
       </div>
       <ul class="joblist" id="listaTrabajos"></ul>
     </section>
-
-    <section class="card">
-      <h2><span class="num">✓</span> Historial de trabajos realizados</h2>
-      <p class="mini" style="margin:-10px 0 16px">Los trabajos que marcas como cerrados/cobrados aparecen aquí. Puedes filtrar por mes, imprimir el historial y eliminar un mes completo cuando ya lo tengas guardado.</p>
-      <div class="histctrl">
-        <div class="mesbox">
-          <label>Filtrar por mes</label>
-          <select id="histMes" onchange="cambiarMes()"></select>
-        </div>
-        <button class="btn-rust" onclick="imprimirHistorial()">🖨 Imprimir / PDF</button>
-        <button class="btn-ghost" onclick="eliminarMes()">🗑 Eliminar mes</button>
-      </div>
-      <ul class="joblist" id="listaHistorial"></ul>
-      <div id="histTotal"></div>
-    </section>
-
-    <section class="card">
-      <h2><span class="num">★</span> Catálogo de materiales</h2>
-      <p class="mini" style="margin:-10px 0 16px">Guarda los materiales que compras con su precio base y su IVA. La app calcula el precio final con IVA. Luego podrás elegirlos en cada trabajo sin volver a escribirlos.</p>
-      <div class="grid gcat">
-        <div><label>Material</label><input id="c_nombre" placeholder="Ej. Saco de cemento"></div>
-        <div><label>Precio base (€)</label><input type="number" id="c_precio" min="0" step="0.01" placeholder="0,00"></div>
-        <div><label>IVA</label>
-          <select id="c_iva">
-            <option value="21">21 %</option>
-            <option value="10">10 %</option>
-            <option value="4">4 %</option>
-            <option value="0">0 %</option>
-          </select>
-        </div>
-      </div>
-      <button class="btn-add" style="margin-top:14px" onclick="addCatalogo()">+ Guardar en catálogo</button>
-      <ul class="joblist" id="listaCatalogo" style="margin-top:18px"></ul>
-    </section>
   </div>
 
-  <!-- ============ VISTA EDITOR ============ -->
   <div id="vistaEditor" class="hidden">
-
     <section class="card">
       <div class="topbar">
-        <button class="btn-ghost" onclick="volverLista()">← Volver a la lista</button>
+        <button class="btn-ghost" onclick="volverLista()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Volver a la lista
+        </button>
         <div class="estado-row">
           <span id="badgeEstado" class="badge abierto">Abierto</span>
           <button class="btn-add" id="btnEstado" onclick="toggleEstado()">Marcar como cerrado/cobrado</button>
         </div>
       </div>
-      <h2><span class="num">i</span> Datos del trabajo</h2>
+      <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke-linecap="round"/></svg></span>Datos del trabajo</h2>
       <div class="grid g2">
         <div><label>Cliente / Trabajo</label><input id="cliente" placeholder="Ej. Reforma piso Sr. García"></div>
         <div><label>Referencia</label><input id="ref" placeholder="Nº presupuesto"></div>
@@ -203,13 +247,15 @@
     </section>
 
     <section class="card">
-      <h2><span class="num">1</span> Horas de trabajo</h2>
+      <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Horas de trabajo</h2>
       <div class="grid g3">
         <div><label>Fecha</label><input type="date" id="h_fecha"></div>
         <div><label>Horas empleadas</label><input type="number" id="h_horas" min="0" step="0.25" placeholder="0"></div>
         <div><label>Precio por hora (€)</label><input type="number" id="h_precio" min="0" step="0.01" placeholder="0,00"></div>
       </div>
-      <button class="btn-add" style="margin-top:16px" onclick="addHora()">+ Añadir jornada</button>
+      <button class="btn-add" style="margin-top:16px" onclick="addHora()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Añadir jornada
+      </button>
       <table>
         <thead><tr><th>Fecha</th><th class="num">Horas</th><th class="num">€/h</th><th class="num">Subtotal</th><th></th></tr></thead>
         <tbody id="tablaHoras"></tbody>
@@ -217,21 +263,15 @@
     </section>
 
     <section class="card">
-      <h2><span class="num">2</span> Materiales comprados</h2>
-
-      <div class="selecto">
-        <label>Elegir del catálogo (precio con IVA incluido)</label>
-        <select id="m_catalogo" onchange="elegirCatalogo()">
-          <option value="">— Escribir manualmente —</option>
-        </select>
-      </div>
-
+      <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 7l9-4 9 4v10l-9 4-9-4V7z" stroke-linejoin="round"/><path d="M3 7l9 4 9-4M12 11v10" stroke-linejoin="round"/></svg></span>Materiales comprados</h2>
       <div class="grid g3">
         <div><label>Material</label><input id="m_nombre" placeholder="Ej. Saco cemento"></div>
         <div><label>Cantidad</label><input type="number" id="m_cant" min="0" step="0.01" placeholder="1"></div>
-        <div><label>Precio unidad c/IVA (€)</label><input type="number" id="m_precio" min="0" step="0.01" placeholder="0,00"></div>
+        <div><label>Precio unidad (€)</label><input type="number" id="m_precio" min="0" step="0.01" placeholder="0,00"></div>
       </div>
-      <button class="btn-add" style="margin-top:16px" onclick="addMaterial()">+ Añadir material</button>
+      <button class="btn-add" style="margin-top:16px" onclick="addMaterial()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg>Añadir material
+      </button>
       <table>
         <thead><tr><th>Material</th><th class="num">Cant.</th><th class="num">€/u</th><th class="num">Subtotal</th><th></th></tr></thead>
         <tbody id="tablaMat"></tbody>
@@ -239,51 +279,37 @@
     </section>
 
     <section class="card">
-      <h2><span class="num">3</span> Resumen y cierre</h2>
+      <h2><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M9 11l3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/><rect x="3" y="4" width="18" height="16" rx="3"/></svg></span>Resumen y cierre</h2>
       <div class="totals">
         <div class="totline"><span>Total horas trabajadas</span><span id="t_horas">0 h</span></div>
         <div class="totline"><span>Coste mano de obra</span><span id="t_mano">0,00 €</span></div>
-        <div class="totline"><span>Coste materiales (IVA incl.)</span><span id="t_mat">0,00 €</span></div>
+        <div class="totline"><span>Coste materiales</span><span id="t_mat">0,00 €</span></div>
         <div class="totline grand"><span>TOTAL</span><span id="t_total">0,00 €</span></div>
       </div>
       <div class="actions">
-        <button class="btn-rust" onclick="generarPDF()">⬇ Descargar PDF</button>
+        <button class="btn-brand" onclick="generarPDF()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M12 3v12M7 10l5 5 5-5M5 21h14" stroke-linecap="round" stroke-linejoin="round"/></svg>Descargar PDF
+        </button>
       </div>
       <p class="mini" style="text-align:center">Los cambios se guardan automáticamente en este dispositivo.</p>
     </section>
-
   </div>
 
 </div>
 
 <script>
 let trabajos = [];
-let catalogo = [];
 let actualId = null;
-let filtroMes = 'todos';
 
 function nuevoId(){return 't_'+Date.now()+'_'+Math.floor(Math.random()*1000);}
 function val(id){return document.getElementById(id).value;}
 function eur(n){return n.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';}
-function redondea(n){return Math.round(n*100)/100;}
-function precioConIva(c){return redondea((c.precio||0)*(1+(c.iva||0)/100));}
 
-function guardarTodo(){try{localStorage.setItem('controlTrabajos_v2',JSON.stringify(trabajos));}catch(e){}}
+function guardarTodo(){localStorage.setItem('reformasEA_v1',JSON.stringify(trabajos));}
 function cargarTodo(){
-  try{
-    const raw = localStorage.getItem('controlTrabajos_v2');
-    if(!raw) return;
-    trabajos = JSON.parse(raw)||[];
-  }catch(e){ trabajos=[]; }
-}
-function guardarCatalogo(){try{localStorage.setItem('controlTrabajos_catalogo_v1',JSON.stringify(catalogo));}catch(e){}}
-function cargarCatalogo(){
-  try{
-    const raw = localStorage.getItem('controlTrabajos_catalogo_v1');
-    if(!raw) return;
-    catalogo = JSON.parse(raw)||[];
-    catalogo.forEach(function(c){ if(typeof c.iva!=='number') c.iva=0; });
-  }catch(e){ catalogo=[]; }
+  let raw = localStorage.getItem('reformasEA_v1') || localStorage.getItem('controlTrabajos_v3') || localStorage.getItem('controlTrabajos_v2');
+  if(!raw) return;
+  try{ trabajos = JSON.parse(raw)||[]; }catch(e){ trabajos=[]; }
 }
 function getActual(){return trabajos.find(t=>t.id===actualId);}
 
@@ -294,318 +320,86 @@ function totalesDe(t){
   return {totH, totMano, totMat, total: totMano+totMat};
 }
 
-/* ---------- CATÁLOGO ---------- */
-function addCatalogo(){
-  const nombre = val('c_nombre').trim();
-  const precio = parseFloat(val('c_precio'))||0;
-  const iva = parseFloat(val('c_iva'))||0;
-  if(!nombre){alert('Introduce el nombre del material.');return;}
-  const idx = catalogo.findIndex(c=>c.nombre.toLowerCase()===nombre.toLowerCase());
-  if(idx>=0){ catalogo[idx].precio = precio; catalogo[idx].iva = iva; }
-  else { catalogo.push({nombre:nombre, precio:precio, iva:iva}); }
-  catalogo.sort((a,b)=>a.nombre.localeCompare(b.nombre,'es'));
-  guardarCatalogo();
-  document.getElementById('c_nombre').value='';
-  document.getElementById('c_precio').value='';
-  document.getElementById('c_iva').value='21';
-  renderCatalogo();
-  pintarSelectCatalogo();
-}
-function delCatalogo(i){
-  const c = catalogo[i];
-  if(!confirm('¿Quitar "'+(c?c.nombre:'')+'" del catálogo?')) return;
-  catalogo.splice(i,1);
-  guardarCatalogo();
-  renderCatalogo();
-  pintarSelectCatalogo();
-}
-function renderCatalogo(){
-  const ul = document.getElementById('listaCatalogo');
-  if(!ul) return;
-  if(catalogo.length===0){
-    ul.innerHTML='<li class="empty">Aún no hay materiales en el catálogo.</li>';
-    return;
-  }
-  ul.innerHTML = catalogo.map((c,i)=>'<li class="jobitem">'+
-    '<div class="info"><strong>'+c.nombre+'</strong>'+
-      '<small>Base '+eur(c.precio||0)+' · IVA '+(c.iva||0)+'%</small></div>'+
-    '<span class="money">'+eur(precioConIva(c))+'<small>con IVA</small></span>'+
-    '<button class="del" onclick="delCatalogo('+i+')" title="Quitar">🗑</button>'+
-  '</li>').join('');
-}
-function pintarSelectCatalogo(){
-  const sel = document.getElementById('m_catalogo');
-  if(!sel) return;
-  sel.innerHTML = '<option value="">— Escribir manualmente —</option>' +
-    catalogo.map((c,i)=>'<option value="'+i+'">'+c.nombre+'  ('+eur(precioConIva(c))+' c/IVA)</option>').join('');
-  sel.value='';
-}
-function elegirCatalogo(){
-  const sel = document.getElementById('m_catalogo');
-  if(sel.value==='') return;
-  const item = catalogo[parseInt(sel.value)];
-  if(item){
-    document.getElementById('m_nombre').value = item.nombre;
-    document.getElementById('m_precio').value = precioConIva(item);
-    document.getElementById('m_cant').focus();
-  }
-}
-
-/* ---------- LISTA TRABAJOS ACTIVOS ---------- */
 function render(){
+  let pend=0, cob=0;
+  trabajos.forEach(t=>{const tt=totalesDe(t);if(t.estado==='cerrado')cob+=tt.total;else pend+=tt.total;});
+  document.getElementById('st_total').textContent = trabajos.length;
+  document.getElementById('st_abierto').textContent = eur(pend);
+  document.getElementById('st_cerrado').textContent = eur(cob);
+
   const ul = document.getElementById('listaTrabajos');
-  const activos = trabajos.filter(t=>t.estado!=='cerrado');
-  if(activos.length===0){
-    ul.innerHTML='<li class="empty">No hay trabajos activos. Pulsa “Nuevo trabajo” para empezar.</li>';
+  if(trabajos.length===0){
+    ul.innerHTML='<li class="empty">Aún no hay trabajos. Pulsa “Nuevo trabajo” para empezar.</li>';
     return;
   }
-  ul.innerHTML = activos.map(t=>{
-    const {total} = totalesDe(t);
+  const casa='<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 11l8-7 8 7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9h12v-9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  ul.innerHTML = trabajos.map(t=>{
+    const tt = totalesDe(t);
     const nombre = (t.cliente && t.cliente.trim()) || 'Sin nombre';
     const fecha = t.creado ? new Date(t.creado).toLocaleDateString('es-ES') : '';
+    const estCls = t.estado==='cerrado'?'cerrado':'abierto';
+    const estTxt = t.estado==='cerrado'?'Cerrado':'Abierto';
     return '<li class="jobitem">'+
-      '<span class="badge abierto">Abierto</span>'+
-      '<div class="info" onclick="abrirTrabajo(\''+t.id+'\')">'+
-        '<strong>'+nombre+'</strong>'+
-        '<small>'+(t.ref?('Ref. '+t.ref+' · '):'')+fecha+'</small>'+
-      '</div>'+
-      '<span class="money">'+eur(total)+'</span>'+
-      '<button class="del" onclick="borrarTrabajo(\''+t.id+'\')" title="Borrar">🗑</button>'+
-    '</li>';
+      '<div class="avatar">'+casa+'</div>'+
+      '<span class="badge '+estCls+'">'+estTxt+'</span>'+
+      '<div class="info" onclick="abrirTrabajo(\''+t.id+'\')"><strong>'+nombre+'</strong>'+
+        '<small>'+(t.ref?('Ref. '+t.ref+' · '):'')+fecha+'</small></div>'+
+      '<span class="money">'+eur(tt.total)+'</span>'+
+      '<button class="del" onclick="borrarTrabajo(\''+t.id+'\')" title="Borrar">🗑</button></li>';
   }).join('');
-}
-
-/* ---------- HISTORIAL (CERRADOS) ---------- */
-function mesKeyDe(t){
-  const ts = t.cerradoEn || t.creado || Date.now();
-  const d = new Date(ts);
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
-}
-function mesLabelDe(key){
-  if(key==='todos') return 'Todos los meses';
-  const p = key.split('-');
-  const d = new Date(parseInt(p[0]), parseInt(p[1])-1, 1);
-  const s = d.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
-  return s.charAt(0).toUpperCase()+s.slice(1);
-}
-function buildMesOptions(){
-  const sel = document.getElementById('histMes');
-  if(!sel) return;
-  const cerrados = trabajos.filter(t=>t.estado==='cerrado');
-  const claves = Array.from(new Set(cerrados.map(mesKeyDe))).sort().reverse();
-  if(filtroMes!=='todos' && claves.indexOf(filtroMes)===-1) filtroMes='todos';
-  sel.innerHTML = '<option value="todos">Todos los meses</option>' +
-    claves.map(k=>'<option value="'+k+'">'+mesLabelDe(k)+'</option>').join('');
-  sel.value = filtroMes;
-}
-function cambiarMes(){
-  filtroMes = document.getElementById('histMes').value;
-  renderHistorial();
-}
-function cerradosFiltrados(){
-  let c = trabajos.filter(t=>t.estado==='cerrado');
-  if(filtroMes!=='todos') c = c.filter(t=>mesKeyDe(t)===filtroMes);
-  return c;
-}
-function renderHistorial(){
-  const ul = document.getElementById('listaHistorial');
-  const box = document.getElementById('histTotal');
-  if(!ul) return;
-  buildMesOptions();
-  const cerrados = cerradosFiltrados()
-    .sort((a,b)=>(b.cerradoEn||b.creado||0)-(a.cerradoEn||a.creado||0));
-  if(cerrados.length===0){
-    ul.innerHTML='<li class="empty">'+
-      (filtroMes==='todos'
-        ? 'Aún no hay trabajos cerrados. Marca un trabajo como “cerrado/cobrado” y aparecerá aquí.'
-        : 'No hay trabajos cerrados en '+mesLabelDe(filtroMes)+'.')+
-      '</li>';
-    box.innerHTML='';
-    return;
-  }
-  let suma=0;
-  ul.innerHTML = cerrados.map(t=>{
-    const {total} = totalesDe(t); suma+=total;
-    const nombre = (t.cliente && t.cliente.trim()) || 'Sin nombre';
-    const f = t.cerradoEn ? new Date(t.cerradoEn).toLocaleDateString('es-ES') : '';
-    return '<li class="jobitem">'+
-      '<span class="badge cerrado">Cobrado</span>'+
-      '<div class="info" onclick="abrirTrabajo(\''+t.id+'\')">'+
-        '<strong>'+nombre+'</strong>'+
-        '<small>'+(t.ref?('Ref. '+t.ref+' · '):'')+(f?('Cerrado '+f):'')+'</small>'+
-      '</div>'+
-      '<span class="money">'+eur(total)+'</span>'+
-      '<button class="del" onclick="borrarTrabajo(\''+t.id+'\')" title="Borrar">🗑</button>'+
-    '</li>';
-  }).join('');
-  box.innerHTML = '<div class="totals" style="margin-top:18px">'+
-    '<div class="totline"><span>Trabajos en '+(filtroMes==='todos'?'el historial':mesLabelDe(filtroMes))+'</span><span>'+cerrados.length+'</span></div>'+
-    '<div class="totline grand"><span>Total facturado</span><span>'+eur(suma)+'</span></div>'+
-  '</div>';
-}
-
-function eliminarMes(){
-  if(filtroMes==='todos'){
-    alert('Elige primero un mes concreto en el desplegable para poder eliminarlo.');
-    return;
-  }
-  const label = mesLabelDe(filtroMes);
-  const aBorrar = trabajos.filter(t=>t.estado==='cerrado' && mesKeyDe(t)===filtroMes);
-  if(aBorrar.length===0){ alert('No hay trabajos cerrados en '+label+'.'); return; }
-  if(!confirm('¿Eliminar los '+aBorrar.length+' trabajo(s) cerrados de '+label+'?\n\nEsta acción NO se puede deshacer. Imprime el historial antes si quieres conservarlo.')) return;
-  trabajos = trabajos.filter(t=>!(t.estado==='cerrado' && mesKeyDe(t)===filtroMes));
-  filtroMes='todos';
-  guardarTodo();
-  renderHistorial();
-}
-
-function imprimirHistorial(){
-  const cerrados = cerradosFiltrados()
-    .sort((a,b)=>(a.cerradoEn||a.creado||0)-(b.cerradoEn||b.creado||0));
-  if(cerrados.length===0){ alert('No hay trabajos en el historial para imprimir.'); return; }
-  const jsPDF=window.jspdf.jsPDF;
-  const doc=new jsPDF();
-  let y=20;
-
-  doc.setTextColor(143,61,28); doc.setFont('helvetica','bold'); doc.setFontSize(20);
-  doc.text('Historial de trabajos',14,y); y+=8;
-  doc.setFontSize(12); doc.setTextColor(90,107,58); doc.setFont('helvetica','normal');
-  doc.text(filtroMes==='todos'?'Periodo: todos los meses':'Periodo: '+mesLabelDe(filtroMes),14,y); y+=4;
-  doc.setFontSize(9);
-  doc.text('Impreso: '+new Date().toLocaleDateString('es-ES'),14,y); y+=4;
-  doc.setDrawColor(199,154,62); doc.setLineWidth(1); doc.line(14,y,196,y); y+=10;
-
-  doc.setFontSize(9); doc.setTextColor(90,107,58); doc.setFont('helvetica','bold');
-  doc.text('FECHA',14,y); doc.text('CLIENTE / TRABAJO',42,y);
-  doc.text('TOTAL',196,y,{align:'right'}); y+=2;
-  doc.setDrawColor(216,201,178); doc.setLineWidth(.3); doc.line(14,y,196,y); y+=6;
-  doc.setFont('helvetica','normal'); doc.setTextColor(40,30,20); doc.setFontSize(10);
-
-  let suma=0;
-  cerrados.forEach(function(t){
-    if(y>275){doc.addPage();y=20;}
-    const tt=totalesDe(t); suma+=tt.total;
-    const f = t.cerradoEn ? new Date(t.cerradoEn).toLocaleDateString('es-ES') : '—';
-    let nombre = (t.cliente && t.cliente.trim()) || 'Sin nombre';
-    if(t.ref) nombre += ' (Ref. '+t.ref+')';
-    doc.text(f,14,y);
-    doc.text(String(nombre).substring(0,55),42,y);
-    doc.text(eur(tt.total),196,y,{align:'right'}); y+=6;
-  });
-
-  y+=4; if(y>255){doc.addPage();y=20;}
-  doc.setDrawColor(199,154,62); doc.setLineWidth(.5); doc.line(14,y,196,y); y+=12;
-  doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(143,61,28);
-  doc.text('Trabajos realizados: '+cerrados.length,14,y);
-  doc.text('Total facturado: '+eur(suma),196,y,{align:'right'});
-
-  const nombreArch='Historial_'+(filtroMes==='todos'?'completo':filtroMes)+'.pdf';
-  try{ doc.save(nombreArch); }catch(e){}
-  try{
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    const w = window.open(url,'_blank');
-    if(!w){
-      const a = document.createElement('a');
-      a.href = url; a.download = nombreArch; a.target='_blank';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    }
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
-  }catch(e){
-    alert('No se pudo generar el PDF en este entorno. Prueba a abrir esta app en una pestaña aparte del navegador.');
-  }
 }
 
 function nuevoTrabajo(){
-  const t = {id:nuevoId(), cliente:'', ref:'', estado:'abierto',
-             creado:Date.now(), cerradoEn:null, horas:[], materiales:[]};
-  trabajos.unshift(t);
-  guardarTodo();
-  abrirTrabajo(t.id);
+  const t = {id:nuevoId(), cliente:'', ref:'', estado:'abierto', creado:Date.now(), horas:[], materiales:[]};
+  trabajos.unshift(t); guardarTodo(); abrirTrabajo(t.id);
 }
-
 function borrarTrabajo(id){
   const t = trabajos.find(x=>x.id===id);
   if(!confirm('¿Borrar el trabajo "'+((t&&t.cliente)||'Sin nombre')+'"? Esta acción no se puede deshacer.')) return;
-  trabajos = trabajos.filter(x=>x.id!==id);
-  guardarTodo();
-  render();
-  renderHistorial();
+  trabajos = trabajos.filter(x=>x.id!==id); guardarTodo(); render();
 }
-
 function abrirTrabajo(id){
-  actualId = id;
-  const t = getActual();
+  actualId = id; const t = getActual();
   document.getElementById('cliente').value = t.cliente||'';
   document.getElementById('ref').value = t.ref||'';
   document.getElementById('h_fecha').value = new Date().toISOString().split('T')[0];
-  pintarSelectCatalogo();
   document.getElementById('vistaLista').classList.add('hidden');
   document.getElementById('vistaEditor').classList.remove('hidden');
-  window.scrollTo(0,0);
-  renderEditor();
+  window.scrollTo(0,0); renderEditor();
 }
-
 function volverLista(){
   actualId=null;
   document.getElementById('vistaEditor').classList.add('hidden');
   document.getElementById('vistaLista').classList.remove('hidden');
-  render();
-  renderHistorial();
-  renderCatalogo();
-  window.scrollTo(0,0);
+  render(); window.scrollTo(0,0);
 }
-
 function toggleEstado(){
   const t = getActual();
-  if(t.estado==='cerrado'){ t.estado='abierto'; t.cerradoEn=null; }
-  else { t.estado='cerrado'; t.cerradoEn=Date.now(); }
-  guardarTodo();
-  renderEditor();
+  t.estado = t.estado==='cerrado' ? 'abierto' : 'cerrado';
+  guardarTodo(); renderEditor();
 }
-
 function renderEditor(){
-  const t = getActual();
-  if(!t) return;
-
+  const t = getActual(); if(!t) return;
   const b = document.getElementById('badgeEstado');
   const btn = document.getElementById('btnEstado');
-  if(t.estado==='cerrado'){
-    b.textContent='Cerrado'; b.className='badge cerrado';
-    btn.textContent='Reabrir trabajo'; btn.className='btn-ghost';
-  }else{
-    b.textContent='Abierto'; b.className='badge abierto';
-    btn.textContent='Marcar como cerrado/cobrado'; btn.className='btn-add';
-  }
+  if(t.estado==='cerrado'){b.textContent='Cerrado';b.className='badge cerrado';btn.textContent='Reabrir trabajo';btn.className='btn-ghost';}
+  else{b.textContent='Abierto';b.className='badge abierto';btn.textContent='Marcar como cerrado/cobrado';btn.className='btn-add';}
 
   const tb = document.getElementById('tablaHoras');
   tb.innerHTML = t.horas.length===0
     ? '<tr><td colspan="5" class="empty">Sin jornadas añadidas</td></tr>'
-    : t.horas.map((x,i)=>'<tr>'+
-        '<td>'+x.fecha+'</td>'+
-        '<td class="num">'+x.horas+'</td>'+
-        '<td class="num">'+eur(x.precio)+'</td>'+
-        '<td class="num">'+eur(x.horas*x.precio)+'</td>'+
-        '<td class="num"><button class="btn-x" onclick="delHora('+i+')">✕</button></td>'+
-      '</tr>').join('');
+    : t.horas.map((x,i)=>'<tr><td>'+x.fecha+'</td><td class="num">'+x.horas+'</td><td class="num">'+eur(x.precio)+'</td><td class="num">'+eur(x.horas*x.precio)+'</td><td class="num"><button class="btn-x" onclick="delHora('+i+')">✕</button></td></tr>').join('');
 
   const tm = document.getElementById('tablaMat');
   tm.innerHTML = t.materiales.length===0
     ? '<tr><td colspan="5" class="empty">Sin materiales añadidos</td></tr>'
-    : t.materiales.map((x,i)=>'<tr>'+
-        '<td>'+x.nombre+'</td>'+
-        '<td class="num">'+x.cant+'</td>'+
-        '<td class="num">'+eur(x.precio)+'</td>'+
-        '<td class="num">'+eur(x.cant*x.precio)+'</td>'+
-        '<td class="num"><button class="btn-x" onclick="delMaterial('+i+')">✕</button></td>'+
-      '</tr>').join('');
+    : t.materiales.map((x,i)=>'<tr><td>'+x.nombre+'</td><td class="num">'+x.cant+'</td><td class="num">'+eur(x.precio)+'</td><td class="num">'+eur(x.cant*x.precio)+'</td><td class="num"><button class="btn-x" onclick="delMaterial('+i+')">✕</button></td></tr>').join('');
 
   const tt = totalesDe(t);
   document.getElementById('t_horas').textContent = tt.totH.toLocaleString('es-ES')+' h';
   document.getElementById('t_mano').textContent = eur(tt.totMano);
   document.getElementById('t_mat').textContent = eur(tt.totMat);
   document.getElementById('t_total').textContent = eur(tt.total);
-
   guardarTodo();
 }
 
@@ -614,86 +408,159 @@ document.getElementById('ref').addEventListener('input',function(e){const t=getA
 
 function addHora(){
   const t=getActual(); if(!t) return;
-  const fecha=val('h_fecha');
-  const h=parseFloat(val('h_horas'))||0;
-  const p=parseFloat(val('h_precio'))||0;
+  const fecha=val('h_fecha'); const h=parseFloat(val('h_horas'))||0; const p=parseFloat(val('h_precio'))||0;
   if(h<=0){alert('Introduce las horas trabajadas.');return;}
   t.horas.push({fecha:fecha||'—',horas:h,precio:p});
-  document.getElementById('h_horas').value='';
-  renderEditor();
+  document.getElementById('h_horas').value=''; renderEditor();
 }
 function delHora(i){const t=getActual();t.horas.splice(i,1);renderEditor();}
-
 function addMaterial(){
   const t=getActual(); if(!t) return;
-  const nombre=val('m_nombre').trim();
-  const c=parseFloat(val('m_cant'))||0;
-  const p=parseFloat(val('m_precio'))||0;
+  const nombre=val('m_nombre').trim(); const c=parseFloat(val('m_cant'))||0; const p=parseFloat(val('m_precio'))||0;
   if(!nombre){alert('Introduce el nombre del material.');return;}
   t.materiales.push({nombre:nombre,cant:c||1,precio:p});
-  document.getElementById('m_nombre').value='';
-  document.getElementById('m_cant').value='';
-  document.getElementById('m_precio').value='';
-  const sel=document.getElementById('m_catalogo'); if(sel) sel.value='';
+  document.getElementById('m_nombre').value=''; document.getElementById('m_cant').value=''; document.getElementById('m_precio').value='';
   renderEditor();
 }
 function delMaterial(i){const t=getActual();t.materiales.splice(i,1);renderEditor();}
 
 function generarPDF(){
   const t=getActual(); if(!t) return;
-  const jsPDF=window.jspdf.jsPDF;
-  const doc=new jsPDF();
-  const tt=totalesDe(t);
-  let y=20;
-
-  doc.setTextColor(143,61,28);
-  doc.setFont('helvetica','bold'); doc.setFontSize(22);
-  doc.text('Control de Trabajo',14,y); y+=8;
-  doc.setDrawColor(199,154,62); doc.setLineWidth(1); doc.line(14,y,196,y); y+=10;
-
-  doc.setTextColor(40,30,20); doc.setFontSize(11); doc.setFont('helvetica','normal');
+  const jsPDF=window.jspdf.jsPDF; const doc=new jsPDF(); const tt=totalesDe(t); let y=18;
+  doc.setFillColor(15,23,42); doc.rect(0,0,210,26,'F');
+  doc.setFillColor(249,115,22); doc.rect(0,26,210,2,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(20);
+  doc.text('Reformas E.A.',14,17);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(180,190,205);
+  doc.text('Control de horas, materiales y presupuestos',14,22);
+  y=40;
+  doc.setTextColor(30,41,59); doc.setFontSize(11); doc.setFont('helvetica','normal');
   doc.text('Cliente / Trabajo: '+(t.cliente||'—'),14,y); y+=6;
   doc.text('Referencia: '+(t.ref||'—'),14,y); y+=6;
   doc.text('Estado: '+(t.estado==='cerrado'?'Cerrado / cobrado':'Abierto'),14,y); y+=6;
   doc.text('Fecha emisión: '+new Date().toLocaleDateString('es-ES'),14,y); y+=12;
 
-  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(181,83,42);
-  doc.text('Resumen de costes',14,y); y+=10;
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(234,88,12);
+  doc.text('1. Horas de trabajo',14,y); y+=8;
+  doc.setFontSize(9); doc.setTextColor(100,116,139);
+  doc.text('FECHA',14,y); doc.text('HORAS',90,y,{align:'right'});
+  doc.text('€/H',130,y,{align:'right'}); doc.text('SUBTOTAL',196,y,{align:'right'}); y+=2;
+  doc.setDrawColor(226,232,240); doc.setLineWidth(.4); doc.line(14,y,196,y); y+=6;
+  doc.setFont('helvetica','normal'); doc.setTextColor(30,41,59); doc.setFontSize(10);
+  if(t.horas.length===0){doc.text('Sin jornadas',14,y);y+=7;}
+  t.horas.forEach(function(x){
+    if(y>275){doc.addPage();y=20;}
+    doc.text(String(x.fecha),14,y); doc.text(String(x.horas),90,y,{align:'right'});
+    doc.text(eur(x.precio),130,y,{align:'right'}); doc.text(eur(x.horas*x.precio),196,y,{align:'right'}); y+=6;
+  });
+  y+=4; if(y>270){doc.addPage();y=20;}
 
-  doc.setFillColor(246,236,216); doc.rect(14,y,182,52,'F');
-  doc.setDrawColor(199,154,62); doc.rect(14,y,182,52,'S');
-  y+=12; doc.setFontSize(12); doc.setTextColor(40,30,20); doc.setFont('helvetica','normal');
-  doc.text('Coste mano de obra',20,y);
-  doc.text(eur(tt.totMano),190,y,{align:'right'}); y+=10;
-  doc.text('Coste total materiales (IVA incl.)',20,y);
-  doc.text(eur(tt.totMat),190,y,{align:'right'}); y+=6;
-  doc.setDrawColor(199,154,62); doc.setLineWidth(.4); doc.line(20,y,190,y); y+=12;
-  doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(143,61,28);
-  doc.text('TOTAL',20,y);
-  doc.text(eur(tt.total),190,y,{align:'right'});
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(234,88,12);
+  doc.text('2. Materiales',14,y); y+=8;
+  doc.setFontSize(9); doc.setTextColor(100,116,139);
+  doc.text('MATERIAL',14,y); doc.text('CANT.',90,y,{align:'right'});
+  doc.text('€/U',130,y,{align:'right'}); doc.text('SUBTOTAL',196,y,{align:'right'}); y+=2;
+  doc.line(14,y,196,y); y+=6;
+  doc.setFont('helvetica','normal'); doc.setTextColor(30,41,59); doc.setFontSize(10);
+  if(t.materiales.length===0){doc.text('Sin materiales',14,y);y+=7;}
+  t.materiales.forEach(function(x){
+    if(y>275){doc.addPage();y=20;}
+    doc.text(String(x.nombre).substring(0,45),14,y); doc.text(String(x.cant),90,y,{align:'right'});
+    doc.text(eur(x.precio),130,y,{align:'right'}); doc.text(eur(x.cant*x.precio),196,y,{align:'right'}); y+=6;
+  });
+  y+=8; if(y>250){doc.addPage();y=20;}
 
-  const nombre='Trabajo_'+(t.cliente||'trabajo').replace(/[^a-z0-9]/gi,'_')+'.pdf';
-  try{ doc.save(nombre); }catch(e){}
-  try{
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    const w = window.open(url,'_blank');
-    if(!w){
-      const a = document.createElement('a');
-      a.href = url; a.download = nombre; a.target='_blank';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  doc.setFillColor(255,237,213); doc.rect(14,y,182,40,'F');
+  doc.setDrawColor(253,186,116); doc.setLineWidth(.6); doc.rect(14,y,182,40,'S');
+  y+=10; doc.setFontSize(11); doc.setTextColor(124,45,18); doc.setFont('helvetica','normal');
+  doc.text('Total horas: '+tt.totH.toLocaleString('es-ES')+' h',20,y);
+  doc.text('Mano de obra: '+eur(tt.totMano),196,y,{align:'right'}); y+=8;
+  doc.text('Materiales: '+eur(tt.totMat),196,y,{align:'right'}); y+=10;
+  doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.setTextColor(234,88,12);
+  doc.text('TOTAL: '+eur(tt.total),196,y,{align:'right'});
+
+  const nombre=(t.cliente||'trabajo').replace(/[^a-z0-9]/gi,'_');
+  doc.save('ReformasEA_'+nombre+'.pdf');
+}
+
+// ===== COPIA DE SEGURIDAD =====
+function guardarCopia(){
+  const datos = {
+    app:'ReformasEA', version:1, fecha:new Date().toISOString(),
+    trabajos: trabajos
+  };
+  const blob = new Blob([JSON.stringify(datos,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const f = new Date();
+  const stamp = f.getFullYear()+'-'+String(f.getMonth()+1).padStart(2,'0')+'-'+String(f.getDate()).padStart(2,'0');
+  a.href = url;
+  a.download = 'ReformasEA_copia_'+stamp+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  localStorage.setItem('reformasEA_ultimaCopia', Date.now());
+  ocultarAviso();
+  actualizarInfoCopia();
+}
+
+function cargarCopia(ev){
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const datos = JSON.parse(e.target.result);
+      const lista = Array.isArray(datos) ? datos : datos.trabajos;
+      if(!Array.isArray(lista)) throw new Error('formato');
+      let msg = '¿Cómo quieres cargar la copia?\n\nAceptar = AÑADIR estos trabajos a los actuales\nCancelar = REEMPLAZAR todo por los de la copia';
+      const anadir = confirm(msg);
+      if(anadir){
+        const idsActuales = new Set(trabajos.map(t=>t.id));
+        lista.forEach(t=>{ if(!idsActuales.has(t.id)) trabajos.push(t); });
+      }else{
+        trabajos = lista;
+      }
+      guardarTodo();
+      render();
+      alert('Copia cargada correctamente. Trabajos totales: '+trabajos.length);
+    }catch(err){
+      alert('No se pudo leer el archivo. Asegúrate de que es una copia de Reformas E.A. (archivo .json).');
     }
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
-  }catch(e){
-    alert('No se pudo generar el PDF en este entorno. Prueba a abrir esta app en una pestaña aparte del navegador.');
+  };
+  reader.readAsText(file);
+  ev.target.value='';
+}
+
+// ===== AVISO PERIÓDICO =====
+const DIAS_AVISO = 7;
+function comprobarAviso(){
+  const ultima = parseInt(localStorage.getItem('reformasEA_ultimaCopia')||'0');
+  const pospuesto = parseInt(localStorage.getItem('reformasEA_avisoPospuesto')||'0');
+  const ahora = Date.now();
+  const ms = DIAS_AVISO*24*60*60*1000;
+  // si hay trabajos, nunca se hizo copia o han pasado los días, y no se pospuso hace poco
+  if(trabajos.length>0 && (ahora-ultima > ms) && (ahora-pospuesto > 24*60*60*1000)){
+    document.getElementById('avisoBackup').classList.add('show');
+  }
+}
+function ocultarAviso(){ document.getElementById('avisoBackup').classList.remove('show'); }
+function posponerAviso(){
+  localStorage.setItem('reformasEA_avisoPospuesto', Date.now());
+  ocultarAviso();
+}
+function actualizarInfoCopia(){
+  const ultima = parseInt(localStorage.getItem('reformasEA_ultimaCopia')||'0');
+  const el = document.getElementById('bb-info');
+  if(!el) return;
+  if(ultima>0){
+    el.textContent = 'Última copia: '+new Date(ultima).toLocaleDateString('es-ES')+
+      ' · Recuerda guardar una nueva tras añadir trabajos.';
+  }else{
+    el.textContent = 'Aún no has guardado ninguna copia. Descárgala para no perder tus trabajos.';
   }
 }
 
-cargarTodo();
-cargarCatalogo();
-render();
-renderHistorial();
-renderCatalogo();
+cargarTodo(); render(); actualizarInfoCopia(); comprobarAviso();
 </script>
 </body>
 </html>
