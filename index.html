@@ -162,6 +162,12 @@
   .cita .cbody small{color:#988;font-size:.82rem}
   .cita .fechatag{font-size:.72rem;color:var(--olive);font-weight:600}
   .cita .del{background:transparent;color:var(--rust-dark);font-size:1.15rem;padding:4px 8px}
+
+  .aviso{background:linear-gradient(135deg,#fff3d6,#f6e4bf);
+    border:1px solid var(--gold);border-radius:14px;padding:16px 18px;margin-bottom:26px;
+    align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 6px 24px var(--shadow);display:none}
+  .aviso.show{display:flex}
+  .aviso .txt{flex:1;min-width:180px;font-size:.92rem;color:var(--rust-dark);font-weight:500}
 </style>
 </head>
 <body>
@@ -186,6 +192,13 @@
 
   <!-- ============ VISTA LISTA ============ -->
   <div id="vistaLista">
+
+    <div class="aviso" id="avisoCopia">
+      <span style="font-size:1.4rem">💾</span>
+      <span class="txt" id="avisoTxt">Hace tiempo que no guardas una copia de seguridad.</span>
+      <button class="btn-rust" onclick="exportarDatos()">Exportar ahora</button>
+      <button class="btn-ghost" onclick="ocultarAviso()">Más tarde</button>
+    </div>
 
     <section class="card">
       <h2><span class="num">📅</span> Agenda</h2>
@@ -257,6 +270,16 @@
       </div>
       <button class="btn-add" style="margin-top:14px" onclick="addCatalogo()">+ Guardar en catálogo</button>
       <ul class="joblist" id="listaCatalogo" style="margin-top:18px"></ul>
+    </section>
+
+    <section class="card">
+      <h2><span class="num">💾</span> Copia de seguridad</h2>
+      <p class="mini" style="margin:-10px 0 16px">Tus datos (trabajos, catálogo y citas) se guardan solo en este dispositivo. Exporta una copia de vez en cuando para no perderla; podrás recuperarla aquí o pasarla a otro móvil u ordenador.</p>
+      <div class="actions" style="justify-content:flex-start;margin-top:0">
+        <button class="btn-rust" onclick="exportarDatos()">⬇ Exportar copia</button>
+        <button class="btn-ghost" onclick="document.getElementById('fileImport').click()">⬆ Importar copia</button>
+        <input type="file" id="fileImport" accept="application/json,.json" style="display:none" onchange="importarDatos(this)">
+      </div>
     </section>
   </div>
 
@@ -903,6 +926,74 @@ function generarPDF(){
   }
 }
 
+/* ---------- COPIA DE SEGURIDAD ---------- */
+function exportarDatos(){
+  const data = {_app:'ControlTrabajos', _fecha:new Date().toISOString(),
+    trabajos:trabajos, catalogo:catalogo, citas:citas};
+  const blob = new Blob([JSON.stringify(data)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const hoy = new Date().toISOString().split('T')[0];
+  const nombre = 'copia-control-trabajos-'+hoy+'.json';
+  const a=document.createElement('a');
+  a.href=url; a.download=nombre;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},60000);
+  try{ localStorage.setItem('controlTrabajos_ultimaCopia', String(Date.now())); }catch(e){}
+  ocultarAviso();
+}
+function importarDatos(input){
+  const file = input.files[0];
+  if(!file){ return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data || (!data.trabajos && !data.catalogo && !data.citas)){
+        alert('Este archivo no parece una copia válida de la aplicación.'); input.value=''; return;
+      }
+      if(!confirm('Al importar se sustituirán TODOS los datos actuales (trabajos, catálogo y citas) por los de la copia. ¿Continuar?')){ input.value=''; return; }
+      trabajos = Array.isArray(data.trabajos)?data.trabajos:[];
+      catalogo = Array.isArray(data.catalogo)?data.catalogo:[];
+      citas = Array.isArray(data.citas)?data.citas:[];
+      catalogo.forEach(function(c){ if(typeof c.iva!=='number') c.iva=0; });
+      guardarTodo(); guardarCatalogo(); guardarCitas();
+      render(); renderHistorial(); renderCatalogo();
+      pintarSelectTrabajos(); renderCalendario(); renderCitas();
+      alert('Copia importada correctamente.');
+    }catch(err){
+      alert('No se pudo leer el archivo. Asegúrate de que es la copia (.json) exportada por esta app.');
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function ocultarAviso(){
+  const el=document.getElementById('avisoCopia');
+  if(el) el.classList.remove('show');
+}
+function checkRecordatorio(){
+  const el=document.getElementById('avisoCopia');
+  const txt=document.getElementById('avisoTxt');
+  if(!el) return;
+  const hayDatos = (trabajos.length>0)||(citas.length>0)||(catalogo.length>0);
+  if(!hayDatos){ el.classList.remove('show'); return; }
+  let ultima=0;
+  try{ ultima=parseInt(localStorage.getItem('controlTrabajos_ultimaCopia'))||0; }catch(e){}
+  if(!ultima){
+    txt.textContent='Aún no has guardado ninguna copia de seguridad. Conviene exportar tus datos para no perderlos.';
+    el.classList.add('show');
+  }else{
+    const dias = Math.floor((Date.now()-ultima)/86400000);
+    if(dias>=14){
+      txt.textContent='Hace '+dias+' días que no guardas una copia de seguridad. Conviene exportar tus datos de nuevo.';
+      el.classList.add('show');
+    }else{
+      el.classList.remove('show');
+    }
+  }
+}
+
 cargarTodo();
 cargarCatalogo();
 cargarCitas();
@@ -912,6 +1003,7 @@ renderCatalogo();
 pintarSelectTrabajos();
 renderCalendario();
 renderCitas();
+checkRecordatorio();
 </script>
 </body>
 </html>
