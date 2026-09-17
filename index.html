@@ -226,8 +226,15 @@
         <button class="btn-add" style="margin-top:14px" onclick="addCita()">+ Añadir a la agenda</button>
       </div>
 
-      <h2 style="font-size:1.1rem;margin-top:24px;margin-bottom:12px"><span class="num" style="width:24px;height:24px;font-size:.8rem">›</span> <span id="tituloCitasDia">Próximas citas</span></h2>
-      <div id="listaCitas"></div>
+      <div style="margin-top:24px">
+        <h2 style="font-size:1.1rem;margin:0 0 12px"><span class="num" style="width:24px;height:24px;font-size:.8rem">›</span> <span id="tituloCitasDia">Próxima cita</span></h2>
+        <div id="proximaCita"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <button class="btn-ghost" id="btnVerTodas" onclick="toggleTodas()">Ver todas las citas ▾</button>
+          <button class="btn-rust" onclick="imprimirAgenda()">🖨 Imprimir agenda</button>
+        </div>
+        <div id="listaCitas" class="hidden" style="margin-top:14px"></div>
+      </div>
     </section>
 
     <section class="card">
@@ -363,6 +370,7 @@ let actualId = null;
 let filtroMes = 'todos';
 let calRef = new Date();          // mes mostrado en el calendario
 let diaSel = null;                // 'YYYY-MM-DD' seleccionado, o null = próximas
+let verTodas = false;             // desplegable "ver todas las citas"
 
 function nuevoId(){return 't_'+Date.now()+'_'+Math.floor(Math.random()*1000);}
 function val(id){return document.getElementById(id).value;}
@@ -492,37 +500,112 @@ function nombreTrabajo(id){
   const t = trabajos.find(x=>x.id===id);
   return t ? ((t.cliente&&t.cliente.trim())||'Sin nombre') : '';
 }
+function citaCardHTML(c, mostrarFecha){
+  const tName = c.trabajoId ? nombreTrabajo(c.trabajoId) : '';
+  return '<div class="cita">'+
+    '<span class="hora">'+(c.hora||'--:--')+'</span>'+
+    '<div class="cbody">'+
+      (mostrarFecha?'<span class="fechatag">'+fechaBonita(c.fecha)+'</span>':'')+
+      '<strong>'+(c.cliente||'(sin cliente)')+'</strong>'+
+      (tName?'<small>🔧 '+tName+'</small>':'')+
+      (c.nota?'<small>'+c.nota+'</small>':'')+
+    '</div>'+
+    '<button class="del" onclick="delCita(\''+c.id+'\')" title="Borrar">🗑</button>'+
+  '</div>';
+}
+function toggleTodas(){
+  verTodas = !verTodas;
+  renderCitas();
+}
 function renderCitas(){
+  const prox = document.getElementById('proximaCita');
   const cont = document.getElementById('listaCitas');
   const titulo = document.getElementById('tituloCitasDia');
+  const btn = document.getElementById('btnVerTodas');
   if(!cont) return;
-  let lista;
+  const hoy = ymd(new Date());
+  const ordenadas = citas.slice().sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora));
+
+  // Día concreto seleccionado en el calendario
   if(diaSel){
     titulo.textContent = 'Citas del '+fechaBonita(diaSel);
-    lista = citas.filter(c=>c.fecha===diaSel);
-  }else{
-    titulo.textContent = 'Próximas citas';
-    const hoy = ymd(new Date());
-    lista = citas.filter(c=>c.fecha>=hoy);
-  }
-  lista.sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora));
-  if(lista.length===0){
-    cont.innerHTML='<div class="empty">'+(diaSel?'No hay citas este día.':'No hay citas próximas. Añade una arriba.')+'</div>';
+    prox.innerHTML = '';
+    const delDia = ordenadas.filter(c=>c.fecha===diaSel);
+    cont.classList.remove('hidden');
+    cont.innerHTML = delDia.length ? delDia.map(c=>citaCardHTML(c,false)).join('')
+      : '<div class="empty">No hay citas este día.</div>';
+    if(btn) btn.style.display='none';
     return;
   }
-  cont.innerHTML = lista.map(c=>{
-    const tName = c.trabajoId ? nombreTrabajo(c.trabajoId) : '';
-    return '<div class="cita">'+
-      '<span class="hora">'+(c.hora||'--:--')+'</span>'+
-      '<div class="cbody">'+
-        (!diaSel?'<span class="fechatag">'+fechaBonita(c.fecha)+'</span>':'')+
-        '<strong>'+(c.cliente||'(sin cliente)')+'</strong>'+
-        (tName?'<small>🔧 '+tName+'</small>':'')+
-        (c.nota?'<small>'+c.nota+'</small>':'')+
-      '</div>'+
-      '<button class="del" onclick="delCita(\''+c.id+'\')" title="Borrar">🗑</button>'+
-    '</div>';
-  }).join('');
+  if(btn) btn.style.display='';
+
+  // Próxima cita (la más cercana de hoy en adelante)
+  const proximas = ordenadas.filter(c=>c.fecha>=hoy);
+  titulo.textContent = 'Próxima cita';
+  const headline = proximas[0] || null;
+  prox.innerHTML = headline ? citaCardHTML(headline, true)
+    : '<div class="empty">No hay citas próximas. Añade una arriba.</div>';
+
+  // Resto de citas (todas las demás, ordenadas por fecha)
+  if(verTodas){
+    const resto = ordenadas.filter(c=>!headline || c.id!==headline.id);
+    cont.classList.remove('hidden');
+    cont.innerHTML = resto.length ? resto.map(c=>citaCardHTML(c,true)).join('')
+      : '<div class="empty">No hay más citas.</div>';
+    if(btn) btn.textContent='Ocultar las demás ▴';
+  }else{
+    cont.classList.add('hidden');
+    if(btn) btn.textContent='Ver todas las citas ▾';
+  }
+}
+
+function imprimirAgenda(){
+  if(citas.length===0){ alert('No hay citas en la agenda para imprimir.'); return; }
+  const jsPDF=window.jspdf.jsPDF;
+  const doc=new jsPDF();
+  let y=20;
+  const ordenadas = citas.slice().sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora));
+
+  doc.setTextColor(143,61,28); doc.setFont('helvetica','bold'); doc.setFontSize(20);
+  doc.text('Reformas E.A. — Agenda',14,y); y+=8;
+  doc.setFontSize(9); doc.setTextColor(90,107,58); doc.setFont('helvetica','normal');
+  doc.text('Impreso: '+new Date().toLocaleDateString('es-ES'),14,y); y+=4;
+  doc.setDrawColor(199,154,62); doc.setLineWidth(1); doc.line(14,y,196,y); y+=10;
+
+  doc.setFontSize(9); doc.setTextColor(90,107,58); doc.setFont('helvetica','bold');
+  doc.text('FECHA',14,y); doc.text('HORA',52,y); doc.text('CLIENTE',72,y); doc.text('NOTA / TRABAJO',122,y); y+=2;
+  doc.setDrawColor(216,201,178); doc.setLineWidth(.3); doc.line(14,y,196,y); y+=6;
+  doc.setFont('helvetica','normal'); doc.setTextColor(40,30,20); doc.setFontSize(9);
+
+  ordenadas.forEach(function(c){
+    if(y>282){doc.addPage();y=20;}
+    const p=c.fecha.split('-');
+    const f=p[2]+'/'+p[1]+'/'+p[0];
+    let extra = c.nota||'';
+    const tName = c.trabajoId?nombreTrabajo(c.trabajoId):'';
+    if(tName) extra = (extra?extra+' · ':'')+'['+tName+']';
+    doc.text(f,14,y);
+    doc.text(c.hora||'--:--',52,y);
+    doc.text(String(c.cliente||'—').substring(0,28),72,y);
+    doc.text(String(extra).substring(0,42),122,y);
+    y+=6;
+  });
+
+  const nombreArch='Agenda_Reformas_EA.pdf';
+  try{ doc.save(nombreArch); }catch(e){}
+  try{
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url,'_blank');
+    if(!w){
+      const a = document.createElement('a');
+      a.href = url; a.download = nombreArch; a.target='_blank';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+  }catch(e){
+    alert('No se pudo generar el PDF en este entorno. Prueba a abrir esta app en una pestaña aparte del navegador.');
+  }
 }
 
 /* ---------- CATÁLOGO ---------- */
@@ -912,98 +995,4 @@ function generarPDF(){
   const nombre='Trabajo_'+(t.cliente||'trabajo').replace(/[^a-z0-9]/gi,'_')+'.pdf';
   try{ doc.save(nombre); }catch(e){}
   try{
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    const w = window.open(url,'_blank');
-    if(!w){
-      const a = document.createElement('a');
-      a.href = url; a.download = nombre; a.target='_blank';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    }
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
-  }catch(e){
-    alert('No se pudo generar el PDF en este entorno. Prueba a abrir esta app en una pestaña aparte del navegador.');
-  }
-}
-
-/* ---------- COPIA DE SEGURIDAD ---------- */
-function exportarDatos(){
-  const data = {_app:'ControlTrabajos', _fecha:new Date().toISOString(),
-    trabajos:trabajos, catalogo:catalogo, citas:citas};
-  const blob = new Blob([JSON.stringify(data)],{type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const hoy = new Date().toISOString().split('T')[0];
-  const nombre = 'copia-control-trabajos-'+hoy+'.json';
-  const a=document.createElement('a');
-  a.href=url; a.download=nombre;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(function(){URL.revokeObjectURL(url);},60000);
-  try{ localStorage.setItem('controlTrabajos_ultimaCopia', String(Date.now())); }catch(e){}
-  ocultarAviso();
-}
-function importarDatos(input){
-  const file = input.files[0];
-  if(!file){ return; }
-  const reader = new FileReader();
-  reader.onload = function(e){
-    try{
-      const data = JSON.parse(e.target.result);
-      if(!data || (!data.trabajos && !data.catalogo && !data.citas)){
-        alert('Este archivo no parece una copia válida de la aplicación.'); input.value=''; return;
-      }
-      if(!confirm('Al importar se sustituirán TODOS los datos actuales (trabajos, catálogo y citas) por los de la copia. ¿Continuar?')){ input.value=''; return; }
-      trabajos = Array.isArray(data.trabajos)?data.trabajos:[];
-      catalogo = Array.isArray(data.catalogo)?data.catalogo:[];
-      citas = Array.isArray(data.citas)?data.citas:[];
-      catalogo.forEach(function(c){ if(typeof c.iva!=='number') c.iva=0; });
-      guardarTodo(); guardarCatalogo(); guardarCitas();
-      render(); renderHistorial(); renderCatalogo();
-      pintarSelectTrabajos(); renderCalendario(); renderCitas();
-      alert('Copia importada correctamente.');
-    }catch(err){
-      alert('No se pudo leer el archivo. Asegúrate de que es la copia (.json) exportada por esta app.');
-    }
-    input.value='';
-  };
-  reader.readAsText(file);
-}
-
-function ocultarAviso(){
-  const el=document.getElementById('avisoCopia');
-  if(el) el.classList.remove('show');
-}
-function checkRecordatorio(){
-  const el=document.getElementById('avisoCopia');
-  const txt=document.getElementById('avisoTxt');
-  if(!el) return;
-  const hayDatos = (trabajos.length>0)||(citas.length>0)||(catalogo.length>0);
-  if(!hayDatos){ el.classList.remove('show'); return; }
-  let ultima=0;
-  try{ ultima=parseInt(localStorage.getItem('controlTrabajos_ultimaCopia'))||0; }catch(e){}
-  if(!ultima){
-    txt.textContent='Aún no has guardado ninguna copia de seguridad. Conviene exportar tus datos para no perderlos.';
-    el.classList.add('show');
-  }else{
-    const dias = Math.floor((Date.now()-ultima)/86400000);
-    if(dias>=14){
-      txt.textContent='Hace '+dias+' días que no guardas una copia de seguridad. Conviene exportar tus datos de nuevo.';
-      el.classList.add('show');
-    }else{
-      el.classList.remove('show');
-    }
-  }
-}
-
-cargarTodo();
-cargarCatalogo();
-cargarCitas();
-render();
-renderHistorial();
-renderCatalogo();
-pintarSelectTrabajos();
-renderCalendario();
-renderCitas();
-checkRecordatorio();
-</script>
-</body>
-</html>
+    const blob = doc.outpu
