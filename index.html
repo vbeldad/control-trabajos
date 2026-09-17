@@ -995,4 +995,98 @@ function generarPDF(){
   const nombre='Trabajo_'+(t.cliente||'trabajo').replace(/[^a-z0-9]/gi,'_')+'.pdf';
   try{ doc.save(nombre); }catch(e){}
   try{
-    const blob = doc.outpu
+    const blob = doc.output('blob');
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url,'_blank');
+    if(!w){
+      const a = document.createElement('a');
+      a.href = url; a.download = nombre; a.target='_blank';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+  }catch(e){
+    alert('No se pudo generar el PDF en este entorno. Prueba a abrir esta app en una pestaña aparte del navegador.');
+  }
+}
+
+/* ---------- COPIA DE SEGURIDAD ---------- */
+function exportarDatos(){
+  const data = {_app:'ControlTrabajos', _fecha:new Date().toISOString(),
+    trabajos:trabajos, catalogo:catalogo, citas:citas};
+  const blob = new Blob([JSON.stringify(data)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const hoy = new Date().toISOString().split('T')[0];
+  const nombre = 'copia-control-trabajos-'+hoy+'.json';
+  const a=document.createElement('a');
+  a.href=url; a.download=nombre;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){URL.revokeObjectURL(url);},60000);
+  try{ localStorage.setItem('controlTrabajos_ultimaCopia', String(Date.now())); }catch(e){}
+  ocultarAviso();
+}
+function importarDatos(input){
+  const file = input.files[0];
+  if(!file){ return; }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data || (!data.trabajos && !data.catalogo && !data.citas)){
+        alert('Este archivo no parece una copia válida de la aplicación.'); input.value=''; return;
+      }
+      if(!confirm('Al importar se sustituirán TODOS los datos actuales (trabajos, catálogo y citas) por los de la copia. ¿Continuar?')){ input.value=''; return; }
+      trabajos = Array.isArray(data.trabajos)?data.trabajos:[];
+      catalogo = Array.isArray(data.catalogo)?data.catalogo:[];
+      citas = Array.isArray(data.citas)?data.citas:[];
+      catalogo.forEach(function(c){ if(typeof c.iva!=='number') c.iva=0; });
+      guardarTodo(); guardarCatalogo(); guardarCitas();
+      render(); renderHistorial(); renderCatalogo();
+      pintarSelectTrabajos(); renderCalendario(); renderCitas();
+      alert('Copia importada correctamente.');
+    }catch(err){
+      alert('No se pudo leer el archivo. Asegúrate de que es la copia (.json) exportada por esta app.');
+    }
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function ocultarAviso(){
+  const el=document.getElementById('avisoCopia');
+  if(el) el.classList.remove('show');
+}
+function checkRecordatorio(){
+  const el=document.getElementById('avisoCopia');
+  const txt=document.getElementById('avisoTxt');
+  if(!el) return;
+  const hayDatos = (trabajos.length>0)||(citas.length>0)||(catalogo.length>0);
+  if(!hayDatos){ el.classList.remove('show'); return; }
+  let ultima=0;
+  try{ ultima=parseInt(localStorage.getItem('controlTrabajos_ultimaCopia'))||0; }catch(e){}
+  if(!ultima){
+    txt.textContent='Aún no has guardado ninguna copia de seguridad. Conviene exportar tus datos para no perderlos.';
+    el.classList.add('show');
+  }else{
+    const dias = Math.floor((Date.now()-ultima)/86400000);
+    if(dias>=14){
+      txt.textContent='Hace '+dias+' días que no guardas una copia de seguridad. Conviene exportar tus datos de nuevo.';
+      el.classList.add('show');
+    }else{
+      el.classList.remove('show');
+    }
+  }
+}
+
+cargarTodo();
+cargarCatalogo();
+cargarCitas();
+render();
+renderHistorial();
+renderCatalogo();
+pintarSelectTrabajos();
+renderCalendario();
+renderCitas();
+checkRecordatorio();
+</script>
+</body>
+</html>
